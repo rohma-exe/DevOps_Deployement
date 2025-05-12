@@ -32,8 +32,15 @@ for (const filePath of modelsFiles) {
 }
 
 // Start our app!
-const app = require('./app');
+const app = require('./src/app');
 app.set('port', process.env.PORT || 8888);
-const server = app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), '0.0.0.0', () => {
   console.log(`Express running → On PORT : ${server.address().port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Database Connection: ${process.env.DATABASE ? 'Configured' : 'Not Configured'}`);
+});
+
+// Add error handling
+server.on('error', (error) => {
+  console.error('Server startup error:', error);
 });
