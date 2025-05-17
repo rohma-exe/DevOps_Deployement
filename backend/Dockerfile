@@ -15,7 +15,7 @@ RUN npm install
 COPY . .
 
 # Expose port used by your backend (can be different from Part-I)
-EXPOSE 8889
+EXPOSE 8888
 
 # Use entry point (update if it's not server.js)
 CMD ["node", "server.js"]
