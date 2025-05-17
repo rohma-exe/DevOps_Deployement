@@ -4,8 +4,6 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
@@ -22,10 +20,8 @@ services:
       - NODE_ENV=production
       - PORT=8888
       - DATABASE=mongodb://mongodb:27017/yourdbname
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - backend_data:/app/data
     networks:
       - app-network
     restart: unless-stopped
@@ -39,10 +35,6 @@ services:
       - backend
     networks:
       - app-network
-    environment:
-      - VITE_FILE_BASE_URL=http://localhost:8888/
-      - VITE_BACKEND_SERVER=http://localhost:8888/
-      - PROD=true
     restart: unless-stopped
 
 networks:
@@ -51,4 +43,4 @@ networks:
 
 volumes:
   mongo_data:
-    driver: local
+  backend_data:
