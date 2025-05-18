@@ -5,6 +5,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: devops-pipeline-frontend:latest
     container_name: frontend-pipeline
     ports:
       - "3001:3000"
@@ -14,12 +15,16 @@ services:
       - backend-pipeline
     volumes:
       - ./frontend:/app
-      # Add volume for code persistence as required in Part 2
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=http://backend-pipeline:8888
 
   backend-pipeline:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: devops-pipeline-backend:latest
     container_name: backend-pipeline
     ports:
       - "8889:8888"
@@ -28,12 +33,17 @@ services:
     volumes:
       - db-data-pipeline:/app/data
       - ./backend:/app
-      # Add volume for code persistence as required in Part 2
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=8888
 
 networks:
   app-network-pipeline:
+    name: app-network-pipeline
     driver: bridge
 
 volumes:
   db-data-pipeline:
+    name: db-data-pipeline
     driver: local
