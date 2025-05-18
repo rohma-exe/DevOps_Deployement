@@ -1,49 +1,20 @@
-version: '3'
+version: '3.8'
 
 services:
-  frontend-pipeline:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: devops-pipeline-frontend:latest
-    container_name: frontend-pipeline
+  backend:
+    build: ./backend
+    container_name: backend
     ports:
-      - "3001:3000"
-    networks:
-      - app-network-pipeline
+      - "8888:8888"
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env
     depends_on:
-      - backend-pipeline
-    volumes:
-      - ./frontend:/app
-    restart: always
-    environment:
-      - NODE_ENV=production
-      - BACKEND_URL=http://backend-pipeline:8888
-
-  backend-pipeline:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: devops-pipeline-backend:latest
-    container_name: backend-pipeline
-    ports:
-      - "8889:8888"
-    networks:
-      - app-network-pipeline
-    volumes:
-      - db-data-pipeline:/app/data
-      - ./backend:/app
-    restart: always
-    environment:
-      - NODE_ENV=production
-      - PORT=8888
-
-networks:
-  app-network-pipeline:
-    name: app-network-pipeline
-    driver: bridge
-
-volumes:
-  db-data-pipeline:
-    name: db-data-pipeline
-    driver: local
+      - backend
