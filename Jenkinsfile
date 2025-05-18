@@ -1,57 +1,37 @@
 pipeline {
-  agent any
-
-  environment {
-    COMPOSE_PROJECT_NAME = "devops_assignment_v2"
-    COMPOSE_FILE = "docker-compose.yml"
-  }
-
-  stages {
-    stage('Clone Repository') {
-      steps {
-        git branch: 'main', url: 'https://github.com/rohma-exe/DevOps_Deployement.git'
-      }
-    }
-
-    stage('Clean up Old Containers and Images') {
-      steps {
-        script {
-          sh '''
-            echo "Removing existing containers if any..."
-            docker rm -f backend-ci || true
-            docker rm -f frontend-ci || true
-
-            echo "Removing old images with incorrect tags (if any)..."
-            docker rmi devops_deployement-backend || true
-            docker rmi devops_assignment_v2-backend || true
-          '''
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clean workspace before checkout
+                cleanWs()
+                // Checkout code from GitHub repository
+                checkout scm
+            }
         }
-      }
-    }
-
-    stage('Build and Start Containers') {
-      steps {
-        script {
-          sh '''
-            echo "Rebuilding containers with correct compose project name..."
-            docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE up -d --build
-          '''
+        
+        stage('Build and Deploy') {
+            steps {
+                // Use docker-compose with custom project name to avoid conflicts
+                sh 'docker-compose -p devops-pipeline -f docker-compose.yml down || true'
+                sh 'docker-compose -p devops-pipeline -f docker-compose.yml build'
+                sh 'docker-compose -p devops-pipeline -f docker-compose.yml up -d'
+            }
         }
-      }
-    }
-
-    stage('Verify Running Containers') {
-      steps {
-        script {
-          sh 'docker ps'
+        
+        stage('Verify Deployment') {
+            steps {
+                // Verify that the containers are running
+                sh 'docker ps | grep -E "frontend-pipeline|backend-pipeline"'
+            }
         }
-      }
     }
-  }
-
-  post {
-    always {
-      echo 'Pipeline execution completed.'
+    
+    post {
+        failure {
+            // Clean up in case of failure
+            sh 'docker-compose -p devops-pipeline -f docker-compose.yml down || true'
+        }
     }
-  }
 }

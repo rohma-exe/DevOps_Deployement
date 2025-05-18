@@ -1,20 +1,39 @@
-version: '3.8'
+version: '3'
 
 services:
-  backend:
-    container_name: backend-ci
-    build:
-      context: ./backend
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8889:8888"
-
-  frontend:
-    container_name: frontend-ci
+  frontend-pipeline:
     build:
       context: ./frontend
-    env_file:
-      - ./frontend/.env
+      dockerfile: Dockerfile
+    container_name: frontend-pipeline
     ports:
       - "3001:3000"
+    networks:
+      - app-network-pipeline
+    depends_on:
+      - backend-pipeline
+    volumes:
+      - ./frontend:/app
+      # Add volume for code persistence as required in Part 2
+
+  backend-pipeline:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-pipeline
+    ports:
+      - "8889:8888"
+    networks:
+      - app-network-pipeline
+    volumes:
+      - db-data-pipeline:/app/data
+      - ./backend:/app
+      # Add volume for code persistence as required in Part 2
+
+networks:
+  app-network-pipeline:
+    driver: bridge
+
+volumes:
+  db-data-pipeline:
+    driver: local
