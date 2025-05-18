@@ -13,28 +13,37 @@ pipeline {
       }
     }
 
-    stage('Verify Compose File') {
+    stage('Clean up Old Containers and Images') {
       steps {
         script {
-          echo "Displaying docker-compose.yml contents for verification:"
-          sh 'cat docker-compose.yml'
+          sh '''
+            echo "Removing existing containers if any..."
+            docker rm -f backend-ci || true
+            docker rm -f frontend-ci || true
+
+            echo "Removing old images with incorrect tags (if any)..."
+            docker rmi devops_deployement-backend || true
+            docker rmi devops_assignment_v2-backend || true
+          '''
         }
       }
     }
 
-    stage('Build Docker Containers') {
+    stage('Build and Start Containers') {
       steps {
         script {
-          sh """
-            echo "Bringing down existing containers and networks..."
-            docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE down
-
-            echo "Building and starting containers with updated config..."
+          sh '''
+            echo "Rebuilding containers with correct compose project name..."
             docker-compose -p $COMPOSE_PROJECT_NAME -f $COMPOSE_FILE up -d --build
+          '''
+        }
+      }
+    }
 
-            echo "Listing running containers for verification:"
-            docker ps --filter "name=${COMPOSE_PROJECT_NAME}"
-          """
+    stage('Verify Running Containers') {
+      steps {
+        script {
+          sh 'docker ps'
         }
       }
     }
