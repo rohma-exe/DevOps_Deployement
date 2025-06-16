@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8888
 
-CMD ["node", "server.js"]  # Replace with your actual entry point
+CMD ["node", "server.js"]
