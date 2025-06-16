@@ -1,13 +1,11 @@
 version: '3.8'
+
 services:
   backend:
     build: ./backend
     container_name: backend
     ports:
       - "8888:8888"
-    volumes:
-       - /var/lib/jenkins/workspace/testing/app/backend:/app
-
 
   frontend:
     build: ./frontend
