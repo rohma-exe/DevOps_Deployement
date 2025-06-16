@@ -6,7 +6,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./backend:/app
+       - /var/lib/jenkins/workspace/testing/app/backend:/app
+
 
   frontend:
     build: ./frontend
